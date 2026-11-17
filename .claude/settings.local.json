@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Get-ChildItem prisma\\\\migrations; $env:DATABASE_URL=\"file:./test.db\"; npx prisma migrate reset --force --skip-seed --skip-generate 2>&1 | Select-Object -Last 15)",
+      "PowerShell(npm test 2>&1)"
+    ]
+  }
+}

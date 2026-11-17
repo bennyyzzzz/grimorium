@@ -1,0 +1,15 @@
+{
+  "name": "grimorium",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Gerenciador de demandas e relatórios diários com IA",
+  "scripts": {
+    "setup": "npm install && npm install --prefix backend && npm install --prefix frontend && npm run prisma:migrate --prefix backend",
+    "dev": "concurrently -n api,web -c blue,magenta \"npm run dev --prefix backend\" \"npm run dev --prefix frontend\"",
+    "dev:backend": "npm run dev --prefix backend",
+    "dev:frontend": "npm run dev --prefix frontend"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.5"
+  }
+}

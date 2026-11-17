@@ -1,0 +1,97 @@
+// Grimorium — modelo de dados
+// Separação fundamental: Activity (demanda cadastrada) x ActivityLog (trabalho efetivamente executado em uma data).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum Importance {
+  HIGH
+  MEDIUM
+  LOW
+}
+
+enum Status {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  CANCELED
+}
+
+// TASK: demanda com ciclo de vida (prazo, andamento, conclusão).
+// CONTACT: interação rápida (chat, WhatsApp, ligação...) registrada no momento em que ocorre.
+enum ActivityType {
+  TASK
+  CONTACT
+}
+
+enum ContactChannel {
+  CHAT
+  WHATSAPP
+  CALL
+  EMAIL
+  MEETING
+  OTHER
+}
+
+model Activity {
+  id          Int           @id @default(autoincrement())
+  type        ActivityType  @default(TASK)
+  title       String
+  description String?
+  category    String?
+  importance  Importance    @default(MEDIUM)
+  status      Status        @default(PENDING)
+  createdAt   DateTime      @default(now())
+  startedAt   DateTime?
+  dueDate     String? // "YYYY-MM-DD" — prazo é uma data, sem horário
+
+  completedAt DateTime?
+  updatedAt   DateTime      @updatedAt
+
+  // Somente para CONTACT
+  channel     ContactChannel?
+  contactName String?
+
+  // Origem do registro: "manual" ou, futuramente, integrações ("google-chat", "whatsapp"...).
+  // externalId permite importar via API sem duplicar.
+  source      String        @default("manual")
+  externalId  String?
+
+  logs        ActivityLog[]
+
+  @@unique([source, externalId])
+  @@index([status])
+  @@index([dueDate])
+  @@index([type])
+}
+
+model ActivityLog {
+  id            Int      @id @default(autoincrement())
+  activityId    Int
+  activity      Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  // Data de referência da execução (dia de trabalho), normalizada para "YYYY-MM-DD"
+  // para facilitar contagem de atividades distintas por dia sem problemas de fuso.
+  executionDate String
+  description   String?
+  timeSpent     Int?     // minutos
+  createdAt     DateTime @default(now())
+
+  @@index([executionDate])
+  @@index([activityId, executionDate])
+}
+
+model Report {
+  id            Int      @id @default(autoincrement())
+  referenceDate String   // "YYYY-MM-DD"
+  content       String
+  pdfPath       String?
+  createdAt     DateTime @default(now())
+
+  @@index([referenceDate])
+}

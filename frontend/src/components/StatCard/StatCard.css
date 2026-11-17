@@ -1,0 +1,35 @@
+.stat-card {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--space-4);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  color: inherit;
+  text-decoration: none;
+  min-width: 0;
+}
+
+.stat-card-link:hover { border-color: var(--accent); }
+
+.stat-label {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.stat-value {
+  font-size: 1.75rem;
+  font-weight: 650;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.stat-value-danger { color: var(--danger); }
+
+.stat-hint {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+}
