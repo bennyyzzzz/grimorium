@@ -140,6 +140,19 @@ export default function TransferPanel({ filters, filteredCount, selectedIds, onS
 
   return (
     <div className="transfer">
+      <div className="local-data-warning" role="note">
+        <strong>Seus dados ficam só neste computador.</strong>
+        <p>
+          O Grimorium não tem backup em nuvem nem servidor. Para não perder informações ou para levá-las a outra
+          máquina, faça backups manuais com a exportação abaixo.
+        </p>
+        <p>
+          O backup JSON cobre <strong>demandas e contatos</strong>. A <strong>Biblioteca</strong> (entradas e anexos)
+          ainda não entra nele: para uma cópia completa, copie também o arquivo <code>backend/prisma/dev.db</code> e a
+          pasta <code>backend/storage</code>.
+        </p>
+      </div>
+
       <section className="transfer-section">
         <h3>Exportar</h3>
 

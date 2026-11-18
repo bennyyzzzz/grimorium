@@ -37,6 +37,25 @@ Para encerrar, feche a janela do terminal.
 
 Para recriar o atalho em outra máquina: botão direito em `iniciar-grimorium.cmd` → **Mostrar mais opções → Enviar para → Área de trabalho (criar atalho)**; em Propriedades → Alterar ícone, use `assets/grimorium.ico`.
 
+## ⚠️ Seus dados ficam só neste computador
+
+O Grimorium é **local**: não há backup em nuvem nem servidor. Tudo fica no PC onde ele roda:
+
+| O quê | Onde |
+|---|---|
+| Demandas, contatos, registros, Biblioteca, relatórios | `backend/prisma/dev.db` (banco SQLite) |
+| Anexos da Biblioteca | `backend/storage/` |
+| Configurações e chaves (Claude, GitHub) | `backend/.env` |
+
+**Faça backups manuais** — para não perder dados (formatação, troca de PC, disco com defeito) ou para usar em outra máquina:
+
+- **Pelo app:** Demandas → **Exportar / Importar** → Backup completo (JSON). Cobre demandas, contatos e registros; importe na outra máquina pelo mesmo painel.
+- **Cópia completa** (inclui a Biblioteca e os anexos): com o Grimorium fechado, copie `backend/prisma/dev.db` e a pasta `backend/storage/` para um local seguro (pendrive, nuvem pessoal etc.).
+
+O aviso também aparece no rodapé da barra lateral (link **Fazer backup**) e no topo do painel de exportação.
+
+📄 **Passo a passo para levar o banco para outro computador:** [docs/levar-para-outro-computador.md](docs/levar-para-outro-computador.md)
+
 ## Validar
 
 | O quê | Como |

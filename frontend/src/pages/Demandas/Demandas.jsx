@@ -25,7 +25,7 @@ function filtersFromParams(params) {
 }
 
 export default function Demandas() {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [filters, setFilters] = useState(() => filtersFromParams(searchParams));
   const [activities, setActivities] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -44,6 +44,21 @@ export default function Demandas() {
 
   const reload = useCallback(() => setReloadKey((k) => k + 1), []);
   const closeModal = useCallback(() => setModal(null), []);
+
+  // Link "Fazer backup" da barra lateral (/demandas?backup=1): abre o painel de exportação.
+  const openBackup = searchParams.get('backup') === '1';
+  useEffect(() => {
+    if (!openBackup) return;
+    setModal({ type: 'transfer' });
+    setSearchParams(
+      (current) => {
+        const next = new URLSearchParams(current);
+        next.delete('backup');
+        return next;
+      },
+      { replace: true },
+    );
+  }, [openBackup, setSearchParams]);
 
   useEffect(() => {
     let active = true;

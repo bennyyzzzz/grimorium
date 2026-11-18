@@ -1,4 +1,4 @@
-import { NavLink, Outlet } from 'react-router-dom';
+import { Link, NavLink, Outlet } from 'react-router-dom';
 import { useApiHealth } from '../../hooks/useApiHealth.js';
 import { LORE } from '../../constants/lore.js';
 import Sigil from '../Summoning/Sigil.jsx';
@@ -40,9 +40,15 @@ export default function Layout() {
             </NavLink>
           ))}
         </nav>
-        <div className={`health health-${health}`} title="Status da conexão com o backend">
-          <span className="health-dot" />
-          {STATUS_LABEL[health]}
+        <div className="sidebar-footer">
+          <p className="data-note">
+            Dados salvos apenas neste computador, sem nuvem.{' '}
+            <Link to="/demandas?backup=1">Fazer backup</Link>
+          </p>
+          <div className={`health health-${health}`} title="Status da conexão com o backend">
+            <span className="health-dot" />
+            {STATUS_LABEL[health]}
+          </div>
         </div>
       </aside>
       <main className="content">
