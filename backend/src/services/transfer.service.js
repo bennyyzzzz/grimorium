@@ -1,5 +1,7 @@
 import { randomUUID } from 'node:crypto';
+import AdmZip from 'adm-zip';
 import { prisma } from '../lib/prisma.js';
+import { exportLibrary, importLibrary, previewLibrary, ATTACHMENT_ZIP_PATH } from './libraryBackup.service.js';
 import { AppError } from '../utils/AppError.js';
 import { toCsv } from '../utils/csv.js';
 import { isDateKey, toDateKey } from '../utils/date.js';
@@ -12,17 +14,21 @@ import {
 } from '../validators/activity.validator.js';
 
 /**
- * Exportação e importação de atividades.
+ * Exportação e importação (backup geral).
  *
- * - JSON: backup completo (atividades + registros de execução). Único formato importável.
+ * - backup (.zip): grimorium-backup.json (atividades + registros + Biblioteca) + pasta attachments/ com os anexos.
+ * - json: só atividades e registros (formato antigo; continua importável).
  * - CSV "atividades": uma linha por demanda/contato, para planilhas.
  * - CSV "registros": uma linha por execução, para análises de produtividade.
  *
- * A importação é idempotente: atividades cujo `uid` (ou par source+externalId) já existe são ignoradas.
+ * A importação é idempotente: itens cujo `uid` (ou origem externa) já existe são ignorados.
  */
 
-export const EXPORT_FORMATS = ['json', 'csv', 'csv-logs'];
-const FORMAT_VERSION = 1;
+export const EXPORT_FORMATS = ['backup', 'json', 'csv', 'csv-logs'];
+const FORMAT_VERSION = 2; // 2 = pode conter "library"
+const BACKUP_JSON_NAME = 'grimorium-backup.json';
+const MAX_BACKUP_JSON_BYTES = 100 * 1024 * 1024;
+const MAX_BACKUP_TOTAL_BYTES = 2 * 1024 * 1024 * 1024; // proteção contra "zip bomb"
 const MAX_IMPORT_ACTIVITIES = 5000;
 const MAX_LOGS_PER_ACTIVITY = 5000;
 
@@ -74,7 +80,8 @@ export async function previewExport(options = {}) {
         })
       : null,
   ]);
-  return { activities, logs, logsInPeriod: logsInPeriod ?? logs };
+  const library = options.includeLibrary ? await previewLibrary() : null;
+  return { activities, logs, logsInPeriod: logsInPeriod ?? logs, library };
 }
 
 function toJsonDocument(activities, { filters, period, ids }) {
@@ -190,11 +197,84 @@ export async function exportActivities(options = {}, format = 'json') {
     };
   }
 
+  const document = toJsonDocument(activities, options);
+
+  if (format === 'backup') {
+    const zip = new AdmZip();
+    let missingFiles = [];
+    if (options.includeLibrary) {
+      const library = await exportLibrary();
+      document.library = library.entries;
+      missingFiles = library.missingFiles;
+      for (const file of library.files) {
+        const folder = file.zipPath.slice(0, file.zipPath.lastIndexOf('/'));
+        zip.addLocalFile(file.diskPath, folder, file.zipPath.slice(folder.length + 1));
+      }
+    }
+    document.missingFiles = missingFiles; // anexos registrados cujo arquivo não existia mais em disco
+    zip.addFile(BACKUP_JSON_NAME, Buffer.from(JSON.stringify(document, null, 2), 'utf8'));
+    zip.addFile(
+      'LEIA-ME.txt',
+      Buffer.from(
+        'Backup do Grimorium.\r\nPara restaurar: Demandas > Exportar / Importar > Importar backup, escolhendo este .zip.\r\n',
+        'utf8',
+      ),
+    );
+    return { filename: `grimorium-backup-${suffix}.zip`, contentType: 'application/zip', body: zip.toBuffer() };
+  }
+
   return {
     filename: `grimorium-backup-${suffix}.json`,
     contentType: 'application/json; charset=utf-8',
-    body: JSON.stringify(toJsonDocument(activities, options), null, 2),
+    body: JSON.stringify(document, null, 2),
   };
+}
+
+/**
+ * Abre um backup .zip com verificações de segurança:
+ * tamanho total descompactado limitado, JSON obrigatório na raiz e anexos apenas em attachments/<uid>/<arquivo>.
+ * @returns {{ payload: object, readAttachment: (zipPath: string) => Buffer | null }}
+ */
+export function openBackupZip(filePath) {
+  let zip;
+  try {
+    zip = new AdmZip(filePath);
+  } catch {
+    throw new AppError('Arquivo .zip inválido ou corrompido');
+  }
+
+  const entries = zip.getEntries();
+  const totalBytes = entries.reduce((sum, e) => sum + (e.header.size || 0), 0);
+  if (totalBytes > MAX_BACKUP_TOTAL_BYTES) throw new AppError('Backup grande demais para importar');
+
+  const jsonEntry = zip.getEntry(BACKUP_JSON_NAME);
+  if (!jsonEntry) throw new AppError('Este .zip não é um backup do Grimorium (falta o grimorium-backup.json)');
+  if (jsonEntry.header.size > MAX_BACKUP_JSON_BYTES) throw new AppError('Backup grande demais para importar');
+
+  let payload;
+  try {
+    payload = JSON.parse(jsonEntry.getData().toString('utf8'));
+  } catch {
+    throw new AppError('O grimorium-backup.json dentro do .zip está corrompido');
+  }
+
+  const readAttachment = (zipPath) => {
+    if (!ATTACHMENT_ZIP_PATH.test(zipPath)) return null;
+    const entry = zip.getEntry(zipPath);
+    return entry && !entry.isDirectory ? entry.getData() : null;
+  };
+
+  return { payload, readAttachment };
+}
+
+/**
+ * Importa um backup (do .zip ou de um .json): atividades e, se houver, a Biblioteca.
+ * @returns {{ activities: object, library: object }}
+ */
+export async function importBackup(payload, readAttachment = null) {
+  const activities = await importActivities(payload);
+  const library = await importLibrary(payload.library, readAttachment);
+  return { activities, library };
 }
 
 // ---------- Importação ----------

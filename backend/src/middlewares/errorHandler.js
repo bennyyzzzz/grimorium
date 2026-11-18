@@ -18,9 +18,9 @@ export function errorHandler(err, req, res, next) {
   // Erros de upload (multer)
   if (err.name === 'MulterError') {
     const messages = {
-      LIMIT_FILE_SIZE: 'Arquivo maior que o limite de 25 MB',
-      LIMIT_FILE_COUNT: 'Envie no máximo 10 arquivos por vez',
-      LIMIT_UNEXPECTED_FILE: 'Campo de arquivo inesperado (use "files")',
+      LIMIT_FILE_SIZE: 'Arquivo maior que o limite permitido',
+      LIMIT_FILE_COUNT: 'Arquivos demais em um só envio',
+      LIMIT_UNEXPECTED_FILE: 'Campo de arquivo inesperado',
     };
     const status = err.code === 'LIMIT_FILE_SIZE' ? 413 : 400;
     return res.status(status).json({ error: messages[err.code] || 'Falha no envio do arquivo' });

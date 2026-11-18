@@ -49,8 +49,9 @@ O Grimorium é **local**: não há backup em nuvem nem servidor. Tudo fica no PC
 
 **Faça backups manuais** — para não perder dados (formatação, troca de PC, disco com defeito) ou para usar em outra máquina:
 
-- **Pelo app:** Demandas → **Exportar / Importar** → Backup completo (JSON). Cobre demandas, contatos e registros; importe na outra máquina pelo mesmo painel.
-- **Cópia completa** (inclui a Biblioteca e os anexos): com o Grimorium fechado, copie `backend/prisma/dev.db` e a pasta `backend/storage/` para um local seguro (pendrive, nuvem pessoal etc.).
+- **Pelo app (recomendado):** Demandas → **Exportar / Importar** → período **Tudo** → **Backup completo (.zip)** com **Incluir a Biblioteca** marcado. O `.zip` leva demandas, contatos, registros e a Biblioteca com anexos; restaure na outra máquina pelo mesmo painel (Importar backup). Guarde o arquivo **fora deste computador**.
+- **Cópia dos arquivos:** com o Grimorium fechado, copie `backend/prisma/dev.db` e a pasta `backend/storage/` para um local seguro.
+- As chaves do `backend/.env` (Claude, GitHub) **não** entram no `.zip`, por segurança — anote-as em local seguro ou gere novas.
 
 O aviso também aparece no rodapé da barra lateral (link **Fazer backup**) e no topo do painel de exportação.
 
@@ -120,7 +121,8 @@ Testes automatizados da regra (banco isolado `test.db`): `npm test --prefix back
 | GET | `/api/dashboard?from=YYYY-MM-DD&to=YYYY-MM-DD` | indicadores do período (máx. 366 dias) + situação atual |
 | GET | `/api/transfer/export?format=json\|csv\|csv-logs&from&to&ids&[filtros da lista]` | download do backup/planilha |
 | GET | `/api/transfer/export/preview?from&to&ids&[filtros]` | prévia: atividades e registros que sairão no arquivo |
-| POST | `/api/transfer/import` | importa um backup JSON (até 20 MB) |
+| POST | `/api/transfer/import` | importa um backup `.json` (formato antigo, até 20 MB) |
+| POST | `/api/transfer/import-zip` | importa um backup `.zip` (multipart, campo `file`, até 1 GB) |
 
 ## Biblioteca
 
@@ -129,7 +131,7 @@ Repositório pessoal de **passo a passo, testes, código/programação e anotaç
 - Conteúdo em **Markdown** com abas Escrever/Visualizar, destaque de sintaxe e botão de copiar em cada bloco de código. HTML embutido no texto não é executado.
 - Cada tipo começa com um modelo (ex.: Objetivo → Pré-requisitos → Passo a passo). Tags, resumo, entradas fixadas e busca por título/conteúdo/tag.
 - **Copiar como Markdown** gera o texto pronto para colar em chat, e-mail, GitHub ou Notion.
-- **Anexos** (até 25 MB, 10 por envio) ficam em `backend/storage/library/` com nome aleatório; só imagens comuns abrem no navegador, o resto é sempre baixado. Inclua essa pasta nos seus backups — o backup JSON de atividades ainda não cobre a Biblioteca.
+- **Anexos** (até 25 MB, 10 por envio) ficam em `backend/storage/library/` com nome aleatório; só imagens comuns abrem no navegador, o resto é sempre baixado. Entradas e anexos entram no **Backup completo (.zip)**.
 
 | Método | Rota | Descrição |
 |---|---|---|
@@ -154,12 +156,16 @@ Na tela Demandas → **Exportar / Importar**:
 
 | Formato | Conteúdo | Importável |
 |---|---|---|
-| Backup completo (JSON) | atividades + todos os registros de execução | sim |
+| Backup completo (.zip) | `grimorium-backup.json` (atividades + registros + Biblioteca) + pasta `attachments/` com os anexos | sim |
 | Planilha de atividades (CSV) | uma linha por demanda/contato, com totais | não |
 | Planilha de registros (CSV) | uma linha por execução | não |
 
-- **Recorte:** por período (7 dias, 30 dias — padrão —, este mês, tudo ou personalizado), opcionalmente com os filtros da lista, ou pelos **itens selecionados** na tabela. O painel mostra a prévia antes de baixar.
-- **Período:** entram as atividades com execução **ou** criação no período. Os CSVs trazem apenas os registros do período; o JSON leva o histórico **completo** de cada atividade incluída (backup íntegro — importar recortes diferentes depois não perde registros).
+Backups `.json` antigos (só atividades) continuam importáveis.
+
+- **Recorte das atividades:** por período (7 dias, 30 dias — padrão —, este mês, tudo ou personalizado), opcionalmente com os filtros da lista, ou pelos **itens selecionados** na tabela. O painel mostra a prévia antes de baixar.
+- **Biblioteca:** com **Incluir a Biblioteca** marcado (padrão), vai inteira, com anexos — não usa período nem seleção.
+- **Período:** entram as atividades com execução **ou** criação no período. Os CSVs trazem apenas os registros do período; o backup leva o histórico **completo** de cada atividade incluída (importar recortes diferentes depois não perde registros).
+- **Segurança na importação:** o `.zip` é verificado (tamanho total, presença do `grimorium-backup.json`, anexos só em `attachments/<uid>/<arquivo>`); anexos ganham nomes novos em disco e nunca são gravados fora da pasta da Biblioteca. As chaves do `.env` não fazem parte do backup.
 - CSV pronto para Excel em português: separador `;`, UTF-8 com BOM, células iniciadas por `= + - @` são neutralizadas.
 - Cada atividade tem um `uid` universal. Importar o mesmo backup de novo (ou em outra conta que já o recebeu) ignora os itens existentes, sem duplicar.
 - Itens inválidos no arquivo são listados com o motivo; os válidos são importados normalmente.
@@ -190,6 +196,6 @@ O período fica na URL (`/?periodo=7d`, `/?de=2026-11-01&ate=2026-11-15`) e os c
 - **Aplicativo instalável (PWA):** manifesto + ícones + service worker para "Instalar" pelo Edge/Chrome e usar em janela própria, com ícone no menu Iniciar e na barra de tarefas.
 - **Servidor único de produção:** o backend serve o build do frontend em um só endereço (`npm start` → `http://localhost:3333`), sem o modo de desenvolvimento.
 - **Iniciar com o Windows:** servidor sobe sozinho em segundo plano ao ligar o PC (pré-requisito para o app instalado abrir sempre funcionando).
-- **Biblioteca no backup:** incluir entradas e anexos da Biblioteca na exportação/importação.
+- **Backup automático:** cópia periódica (ao abrir e diariamente) para uma pasta fora da área sujeita a limpeza (unidade de rede, segundo disco, nuvem pessoal), mantendo as últimas N cópias.
 - **Gerenciar categorias:** renomear, juntar e excluir categorias de demandas.
 - Itens do prompt original: integração com Google Chat, captura automática de demandas, Google Sheets, relatórios agendados e semanais, histórico de produtividade, sugestões de priorização por IA.

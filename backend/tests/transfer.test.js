@@ -137,8 +137,9 @@ test('prévia: conta atividades, registros totais e registros do período', asyn
     activities: 1,
     logs: 2,
     logsInPeriod: 1,
+    library: null,
   });
-  assert.deepEqual(await previewExport({}), { activities: 2, logs: 3, logsInPeriod: 3 });
+  assert.deepEqual(await previewExport({}), { activities: 2, logs: 3, logsInPeriod: 3, library: null });
 });
 
 test('CSV: separador ";", BOM, aspas e quebras de linha escapadas, fórmulas neutralizadas', async () => {

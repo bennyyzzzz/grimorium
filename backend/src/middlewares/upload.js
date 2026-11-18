@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import path from 'node:path';
 import multer from 'multer';
-import { LIBRARY_DIR } from '../utils/storage.js';
+import { LIBRARY_DIR, TMP_DIR } from '../utils/storage.js';
 
 export const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25 MB
 export const MAX_FILES_PER_UPLOAD = 10;
@@ -20,6 +20,13 @@ const storage = multer.diskStorage({
     cb(null, `${randomUUID()}${ext}`);
   },
 });
+
+// Backup .zip para importação: gravado temporariamente e apagado após o processamento.
+export const MAX_BACKUP_SIZE = 1024 * 1024 * 1024; // 1 GB
+export const uploadBackup = multer({
+  dest: TMP_DIR,
+  limits: { fileSize: MAX_BACKUP_SIZE, files: 1 },
+}).single('file');
 
 export const uploadAttachments = multer({
   storage,

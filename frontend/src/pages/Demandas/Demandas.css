@@ -222,7 +222,11 @@ a.btn { text-decoration: none; }
   gap: var(--space-3);
   padding-top: var(--space-2);
 }
-.transfer-preview { margin: 0; font-size: 0.875rem; color: var(--text-muted); }
+.transfer-preview { margin: 0; font-size: 0.875rem; color: var(--text-muted); flex: 1 1 260px; }
+.transfer-library { align-items: flex-start; }
+.transfer-library input { margin-top: 3px; }
+.transfer-library small { font-size: 0.8125rem; }
+.transfer-result p + p { margin-top: var(--space-2); }
 
 .transfer-ready {
   display: flex;

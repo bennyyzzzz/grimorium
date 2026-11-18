@@ -139,7 +139,12 @@ const MAX_EXPORT_IDS = 1000;
  * - ids opcionais (seleção manual, separados por vírgula).
  */
 export function parseExportQuery(query = {}) {
-  const options = { filters: parseListFilters(query), period: null, ids: null };
+  const options = {
+    filters: parseListFilters(query),
+    period: null,
+    ids: null,
+    includeLibrary: query.library === '1', // backup .zip: inclui a Biblioteca inteira (não usa período/filtros)
+  };
 
   if (query.from || query.to) options.period = parsePeriod(query);
 

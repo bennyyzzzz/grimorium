@@ -9,8 +9,10 @@ const BACKEND_ROOT = fileURLToPath(new URL('../../', import.meta.url));
 // Arquivos enviados ficam fora do banco, em disco. STORAGE_DIR permite isolar (ex.: testes).
 export const STORAGE_ROOT = path.resolve(BACKEND_ROOT, process.env.STORAGE_DIR || 'storage');
 export const LIBRARY_DIR = path.join(STORAGE_ROOT, 'library');
+export const TMP_DIR = path.join(STORAGE_ROOT, 'tmp'); // uploads temporários (ex.: backup .zip em importação)
 
 mkdirSync(LIBRARY_DIR, { recursive: true });
+mkdirSync(TMP_DIR, { recursive: true });
 
 export const libraryFilePath = (storedName) => path.join(LIBRARY_DIR, path.basename(storedName));
 

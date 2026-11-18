@@ -5,7 +5,7 @@ O Grimorium guarda tudo localmente, sem nuvem. Para usar seus dados em outra má
 | Situação | Caminho |
 |---|---|
 | O outro computador **ainda não usa** o Grimorium (ou pode ter os dados substituídos) | **A — Mudança completa** (leva tudo: demandas, contatos, registros, Biblioteca, anexos e configurações) |
-| O outro computador **já tem dados** no Grimorium e você quer **juntar** as informações | **B — Exportar e importar** (leva demandas, contatos e registros; não leva a Biblioteca) |
+| O outro computador **já tem dados** no Grimorium e você quer **juntar** as informações — ou você prefere um único arquivo de backup | **B — Backup completo (.zip)** (leva demandas, contatos, registros e a Biblioteca com anexos; não leva as chaves do `.env`) |
 
 ---
 
@@ -64,16 +64,16 @@ Depois de conferir que está tudo certo no novo computador, você pode apagar a 
 
 ---
 
-## B — Exportar e importar (juntar dados)
+## B — Backup completo (.zip)
 
-Leva **demandas, contatos e registros de execução**. A Biblioteca ainda não faz parte desse backup.
+Leva **demandas, contatos, registros e a Biblioteca com anexos** num único arquivo. Funciona tanto para juntar dados num Grimorium que já está em uso quanto para restaurar num Grimorium recém-instalado. Não leva as chaves do `backend/.env` (Claude, GitHub) — configure-as de novo no destino, se usar.
 
-1. **Na origem:** Demandas → **Exportar / Importar** → em “O que exportar”, escolha **Por período → Tudo** → formato **Backup completo (JSON)** → **Baixar arquivo**.
-2. Leve o arquivo `grimorium-backup-….json` para o outro computador (pendrive, e-mail, nuvem).
-3. **No destino:** Demandas → **Exportar / Importar** → **Importar backup** → escolha o arquivo → **Importar**.
-4. Confira o resumo (“X importadas · Y já existiam · Z com erro”). Itens que já existem no destino são ignorados, então importar de novo não duplica nada.
+1. **Na origem:** Demandas → **Exportar / Importar** → em “Demandas e contatos a exportar”, escolha **Por período → Tudo** → formato **Backup completo (.zip)** → deixe **Incluir a Biblioteca** marcado → **Baixar arquivo**.
+2. Leve o arquivo `grimorium-backup-….zip` para o outro computador (pendrive, e-mail, nuvem).
+3. **No destino** (com o Grimorium instalado — dois cliques no `iniciar-grimorium.cmd` na primeira vez): Demandas → **Exportar / Importar** → **Importar backup** → escolha o `.zip` → **Importar**.
+4. Confira o resumo de **Demandas e contatos** e de **Biblioteca** (importadas, já existentes, anexos restaurados e eventuais erros). Itens que já existem no destino são ignorados, então importar de novo não duplica nada.
 
-Para levar entradas da Biblioteca nesse cenário, por enquanto, use **Copiar como Markdown** em cada entrada e crie-a no destino (anexos precisam ser reenviados).
+Backups `.json` gerados antes dessa versão também são aceitos (eles contêm só demandas, contatos e registros).
 
 ---
 

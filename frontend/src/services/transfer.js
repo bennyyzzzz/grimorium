@@ -22,4 +22,18 @@ export const transferService = {
   },
   preview: (params) => api.get(`/transfer/export/preview?${toQuery(params)}`),
   importBackup: (data) => api.post('/transfer/import', data),
+  // Backup .zip (com Biblioteca e anexos) vai como multipart.
+  async importZip(file) {
+    const form = new FormData();
+    form.append('file', file);
+    let response;
+    try {
+      response = await fetch('/api/transfer/import-zip', { method: 'POST', body: form });
+    } catch {
+      throw new Error('Não foi possível conectar ao servidor. Verifique se o backend está em execução.');
+    }
+    const data = await response.json().catch(() => null);
+    if (!response.ok) throw new Error(data?.error || 'Falha ao importar o backup');
+    return data;
+  },
 };
