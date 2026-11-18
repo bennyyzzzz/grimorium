@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import PageHeader from '../../components/PageHeader/PageHeader.jsx';
 import StatCard from '../../components/StatCard/StatCard.jsx';
+import Summoning from '../../components/Summoning/Summoning.jsx';
+import { LORE } from '../../constants/lore.js';
 import BarList from '../../components/charts/BarList.jsx';
 import ColumnChart from '../../components/charts/ColumnChart.jsx';
 import { IMPORTANCE } from '../../constants/activity.js';
@@ -88,7 +90,7 @@ export default function Dashboard() {
       />
 
       {error && <p className="form-error dashboard-error">{error}</p>}
-      {!data && loading && <p className="muted">Carregando…</p>}
+      {!data && loading && <Summoning text={LORE.loadingDashboard} />}
       {data && <DashboardContent data={data} loading={loading} />}
     </>
   );

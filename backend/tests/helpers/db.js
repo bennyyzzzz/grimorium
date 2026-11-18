@@ -17,4 +17,6 @@ export const { prisma } = await import('../../src/lib/prisma.js');
 export async function clearDatabase() {
   await prisma.activityLog.deleteMany();
   await prisma.activity.deleteMany();
+  await prisma.attachment.deleteMany();
+  await prisma.libraryEntry.deleteMany();
 }

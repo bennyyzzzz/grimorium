@@ -41,6 +41,8 @@ enum ContactChannel {
 
 model Activity {
   id          Int           @id @default(autoincrement())
+  // Identificador universal: viaja na exportação JSON e evita duplicar ao importar.
+  uid         String        @unique @default(uuid())
   type        ActivityType  @default(TASK)
   title       String
   description String?
@@ -84,6 +86,53 @@ model ActivityLog {
 
   @@index([executionDate])
   @@index([activityId, executionDate])
+}
+
+// ---------- Biblioteca: repositório pessoal de passo a passo, testes, snippets e anotações ----------
+
+enum EntryKind {
+  HOWTO
+  TEST
+  SNIPPET
+  NOTE
+}
+
+model LibraryEntry {
+  id          Int          @id @default(autoincrement())
+  uid         String       @unique @default(uuid())
+  title       String
+  kind        EntryKind    @default(HOWTO)
+  summary     String?
+  content     String       @default("") // Markdown
+  // Tags normalizadas (minúsculas) no formato ",tag1,tag2," para filtrar com contains(",tag,").
+  tags        String       @default("")
+  pinned      Boolean      @default(false)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  attachments Attachment[]
+
+  // Código importado do GitHub (separado das anotações em `content`, que nunca são sobrescritas).
+  sourceUrl      String?   @unique
+  sourceLabel    String? // ex.: "empresa/projeto · tests/login.cy.js @ main"
+  sourceLanguage String?
+  sourceCode     String?
+  sourceSyncedAt DateTime?
+
+  @@index([kind])
+  @@index([updatedAt])
+}
+
+model Attachment {
+  id           Int          @id @default(autoincrement())
+  entryId      Int
+  entry        LibraryEntry @relation(fields: [entryId], references: [id], onDelete: Cascade)
+  originalName String
+  storedName   String       @unique // nome do arquivo em disco (uuid + extensão)
+  mimeType     String
+  size         Int
+  createdAt    DateTime     @default(now())
+
+  @@index([entryId])
 }
 
 model Report {

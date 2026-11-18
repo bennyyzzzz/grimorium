@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { CHANNEL, IMPORTANCE, toOptions } from '../../constants/activity.js';
+import { LORE } from '../../constants/lore.js';
 import { todayKey } from '../../utils/date.js';
 
 const CHANNEL_OPTIONS = toOptions(CHANNEL);
@@ -99,7 +100,7 @@ export default function ContactForm({ categories, onSubmit, onCancel }) {
           <span>
             Categoria <small>opcional</small>
           </span>
-          <input className="input" list="contact-category-options" maxLength={60} value={values.category} onChange={set('category')} />
+          <input className="input" list="contact-category-options" placeholder="Escolha ou crie" maxLength={60} value={values.category} onChange={set('category')} />
           <datalist id="contact-category-options">
             {categories.map((c) => (
               <option key={c} value={c} />
@@ -153,7 +154,7 @@ export default function ContactForm({ categories, onSubmit, onCancel }) {
           Cancelar
         </button>
         <button type="submit" className="btn btn-primary" disabled={saving}>
-          {saving ? 'Salvando…' : 'Registrar contato'}
+          {saving ? LORE.saving : 'Registrar contato'}
         </button>
       </div>
     </form>

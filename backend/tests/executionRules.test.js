@@ -149,6 +149,23 @@ test('filtro por tipo separa demandas de contatos', async () => {
   assert.deepEqual((await activities.listActivities({ type: 'TASK' })).map((a) => a.title), ['Demanda']);
 });
 
+test('categoria equivalente reaproveita a grafia existente (maiúsculas, acentos, espaços)', async () => {
+  await activities.createActivity({ title: 'A', category: 'Dúvida' });
+  const b = await activities.createActivity({ title: 'B', category: '  duvida ' });
+  const c = await activities.createContact({ title: 'C', category: 'DÚVIDA', date: MON });
+  const d = await activities.createActivity({ title: 'D', category: 'Dúvida  técnica' });
+
+  assert.equal(b.category, 'Dúvida');
+  assert.equal(c.category, 'Dúvida');
+  assert.equal(d.category, 'Dúvida técnica'); // categoria nova, só com espaços normalizados
+
+  const edited = await activities.updateActivity(d.id, { category: 'duvida' });
+  assert.equal(edited.category, 'Dúvida');
+
+  assert.deepEqual(await activities.listCategories(), ['Dúvida']);
+  assert.equal((await activities.listActivities({ category: 'Dúvida' })).length, 4);
+});
+
 test('demanda vencida e aberta é marcada como atrasada', async () => {
   const late = await activities.createActivity({ title: 'Atrasada', dueDate: '2020-01-01' });
   const done = await activities.createActivity({ title: 'Ok', dueDate: '2020-01-01' });

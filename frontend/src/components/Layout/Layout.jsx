@@ -1,15 +1,18 @@
 import { NavLink, Outlet } from 'react-router-dom';
 import { useApiHealth } from '../../hooks/useApiHealth.js';
+import { LORE } from '../../constants/lore.js';
+import Sigil from '../Summoning/Sigil.jsx';
 import './Layout.css';
 
 const NAV_ITEMS = [
   { to: '/', label: 'Dashboard', end: true },
   { to: '/demandas', label: 'Demandas' },
+  { to: '/biblioteca', label: 'Biblioteca' },
   { to: '/relatorios', label: 'Relatórios' },
 ];
 
 const STATUS_LABEL = {
-  checking: 'Verificando…',
+  checking: LORE.summoning,
   ok: 'API e banco online',
   degraded: 'Banco indisponível',
   offline: 'API offline',
@@ -21,7 +24,10 @@ export default function Layout() {
   return (
     <div className="layout">
       <aside className="sidebar">
-        <div className="brand">Grimorium</div>
+        <div className="brand">
+          <Sigil className="brand-sigil" />
+          Grimorium
+        </div>
         <nav className="nav">
           {NAV_ITEMS.map((item) => (
             <NavLink

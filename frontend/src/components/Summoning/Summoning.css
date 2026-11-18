@@ -1,0 +1,41 @@
+.summoning {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  padding: var(--space-6) var(--space-4);
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  letter-spacing: 0.02em;
+}
+
+.summoning-sigil {
+  width: 36px;
+  height: 36px;
+  color: var(--accent);
+}
+
+.sigil-animated .sigil-ring,
+.sigil-animated .sigil-triangle {
+  transform-origin: 12px 12px;
+}
+
+.sigil-animated .sigil-ring { animation: sigil-spin 6s linear infinite; }
+.sigil-animated .sigil-triangle { animation: sigil-spin 4s linear infinite reverse; }
+.sigil-animated { animation: sigil-glow 2.4s ease-in-out infinite; }
+
+@keyframes sigil-spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes sigil-glow {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sigil-animated,
+  .sigil-animated .sigil-ring,
+  .sigil-animated .sigil-triangle { animation: none; }
+}

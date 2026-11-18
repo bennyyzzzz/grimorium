@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react';
 import Badge, { ImportanceBadge, StatusBadge } from '../../components/Badge/Badge.jsx';
+import Summoning from '../../components/Summoning/Summoning.jsx';
+import { LORE } from '../../constants/lore.js';
 import { activityService } from '../../services/activities.js';
+import { useConfirm } from '../../hooks/useConfirm.js';
 import { CHANNEL } from '../../constants/activity.js';
 import { formatDate, formatDateKey, formatMinutes } from '../../utils/date.js';
 import LogForm from './LogForm.jsx';
@@ -25,6 +28,7 @@ export default function ActivityDetail({ activityId, onEdit, onChanged, onDelete
   const [activity, setActivity] = useState(null);
   const [error, setError] = useState(null);
   const [busy, setBusy] = useState(false);
+  const confirm = useConfirm();
 
   useEffect(() => {
     let active = true;
@@ -54,7 +58,7 @@ export default function ActivityDetail({ activityId, onEdit, onChanged, onDelete
   }
 
   if (!activity) {
-    return error ? <p className="form-error">{error}</p> : <p className="muted">Carregando…</p>;
+    return error ? <p className="form-error">{error}</p> : <Summoning text={LORE.loadingActivity} />;
   }
 
   const { id, status } = activity;
@@ -72,14 +76,22 @@ export default function ActivityDetail({ activityId, onEdit, onChanged, onDelete
       return updated;
     });
 
-  const removeLog = (logId) => {
-    if (!window.confirm('Excluir este registro de execução?')) return;
-    run(() => activityService.removeLog(id, logId));
-  };
+  async function removeLog(log) {
+    const confirmed = await confirm({
+      title: 'Excluir registro de execução?',
+      message: `O registro de ${formatDateKey(log.executionDate)} será removido. Se for o único desse dia, a atividade deixa de contar como executada nessa data.`,
+      confirmLabel: 'Excluir registro',
+    });
+    if (confirmed) run(() => activityService.removeLog(id, log.id));
+  }
 
   async function removeActivity() {
-    const kind = isContact ? 'o contato' : 'a demanda';
-    if (!window.confirm(`Excluir ${kind} "${activity.title}" e todos os seus registros?`)) return;
+    const confirmed = await confirm({
+      title: isContact ? 'Excluir contato?' : 'Excluir demanda?',
+      message: `“${activity.title}” e todos os seus registros de execução serão removidos. Essa ação não pode ser desfeita.`,
+      confirmLabel: 'Excluir',
+    });
+    if (!confirmed) return;
     const ok = await run(() => activityService.remove(id));
     if (ok) onDeleted();
   }
@@ -173,7 +185,7 @@ export default function ActivityDetail({ activityId, onEdit, onChanged, onDelete
                   <button
                     type="button"
                     className="btn-icon log-remove"
-                    onClick={() => removeLog(log.id)}
+                    onClick={() => removeLog(log)}
                     disabled={busy}
                     aria-label="Excluir registro"
                     title="Excluir registro"

@@ -12,10 +12,18 @@
 .page-error { margin-bottom: var(--space-4); }
 
 .list-summary {
-  margin: 0 0 var(--space-2);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  min-height: 42px;
+  margin-bottom: var(--space-2);
   font-size: 0.8125rem;
   color: var(--text-muted);
 }
+
+.list-summary .btn { margin-right: calc(-1 * var(--space-2)); }
 
 /* Tabela */
 .activity-table tbody tr { cursor: pointer; }
@@ -35,8 +43,32 @@
   vertical-align: middle;
 }
 .cell-due { white-space: nowrap; }
-.cell-due .badge { margin-left: var(--space-2); }
+.cell-due .badge { display: table; margin-top: 4px; }
 .cell-actions { text-align: right; width: 1%; cursor: default; }
+
+.table th.cell-select,
+.table td.cell-select { width: 1%; padding-right: 0; cursor: default; }
+.cell-select input { width: 16px; height: 16px; accent-color: var(--accent); cursor: pointer; vertical-align: middle; }
+.activity-table tbody tr.row-selected { background: var(--accent-soft); }
+
+.activity-table.is-selecting tbody tr { user-select: none; }
+
+.transfer-pick { align-self: flex-start; margin-top: var(--space-1); color: var(--accent); }
+
+.selection-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  min-height: 42px;
+  margin-bottom: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+  background: var(--accent-soft);
+  font-size: 0.875rem;
+}
+.selection-bar span { margin-right: auto; }
 
 /* Detalhe */
 .detail { display: flex; flex-direction: column; gap: var(--space-4); }
@@ -130,6 +162,68 @@
 .follow-up-due { flex-direction: row; align-items: center; gap: var(--space-2); }
 .follow-up-due .input { width: 160px; }
 .follow-up-hint { flex-basis: 100%; margin: 0; font-size: 0.8125rem; color: var(--text-muted); }
+
+/* Exportar / importar */
+.transfer { display: flex; flex-direction: column; gap: var(--space-5); }
+.transfer-section { display: flex; flex-direction: column; gap: var(--space-3); }
+.transfer-section + .transfer-section { padding-top: var(--space-5); border-top: 1px solid var(--border); }
+.transfer-section h3 { margin: 0; font-size: 0.9375rem; font-weight: 600; }
+.transfer-hint { margin: 0; font-size: 0.8125rem; }
+
+.option-list { display: flex; flex-direction: column; gap: var(--space-2); }
+.option-card {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+.option-card input { margin-top: 3px; accent-color: var(--accent); }
+.option-card.active { border-color: var(--accent); background: var(--accent-soft); }
+.option-card span { display: flex; flex-direction: column; gap: 2px; }
+.option-card strong { font-size: 0.875rem; font-weight: 600; }
+.option-card small { font-size: 0.8125rem; color: var(--text-muted); }
+
+a.btn { text-decoration: none; }
+
+.transfer-period { display: flex; flex-direction: column; gap: var(--space-2); }
+.transfer-period .chip { background: transparent; font: inherit; font-size: 0.8125rem; }
+.transfer-period .period-custom { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); }
+.transfer-period .period-custom .input { width: 160px; }
+
+.transfer-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding-top: var(--space-2);
+}
+.transfer-preview { margin: 0; font-size: 0.875rem; color: var(--text-muted); }
+
+.transfer-ready {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  background: var(--bg);
+  border-radius: var(--radius);
+  font-size: 0.875rem;
+  overflow-wrap: anywhere;
+}
+
+.transfer-result {
+  padding: var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 0.875rem;
+}
+.transfer-result p { margin: 0; }
+.transfer-errors { margin: var(--space-2) 0 0; padding-left: var(--space-5); color: var(--text-muted); font-size: 0.8125rem; }
 
 @media (max-width: 600px) {
   .form-row,

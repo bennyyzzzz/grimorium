@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { CHANNEL, IMPORTANCE, toOptions } from '../../constants/activity.js';
+import { LORE } from '../../constants/lore.js';
 
 const IMPORTANCE_OPTIONS = toOptions(IMPORTANCE);
 const CHANNEL_OPTIONS = toOptions(CHANNEL);
@@ -87,6 +88,7 @@ export default function ActivityForm({ activity, categories, onSubmit, onCancel 
           <input
             className="input"
             list="category-options"
+            placeholder="Escolha uma existente ou crie"
             maxLength={60}
             value={values.category}
             onChange={set('category')}
@@ -130,7 +132,7 @@ export default function ActivityForm({ activity, categories, onSubmit, onCancel 
           Cancelar
         </button>
         <button type="submit" className="btn btn-primary" disabled={saving}>
-          {saving ? 'Salvando…' : activity ? 'Salvar alterações' : 'Cadastrar demanda'}
+          {saving ? LORE.saving : activity ? 'Salvar alterações' : 'Cadastrar demanda'}
         </button>
       </div>
     </form>

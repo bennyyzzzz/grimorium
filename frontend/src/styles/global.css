@@ -27,6 +27,17 @@
   --chart-grid: #eceef1;
   --chart-hover-band: rgba(99, 102, 241, 0.08);
 
+  /* Código (Biblioteca) */
+  --font-mono: ui-monospace, 'Cascadia Code', 'JetBrains Mono', Consolas, monospace;
+  --code-bg: #f7f8fa;
+  --code-comment: #6a737d;
+  --code-keyword: #8b3fd9;
+  --code-string: #1a7f37;
+  --code-number: #b35900;
+  --code-title: #4f46e5;
+  --code-type: #0a6ebd;
+  --code-meta: #c81e1e;
+
   /* Espaçamento */
   --space-1: 4px;
   --space-2: 8px;
@@ -68,6 +79,14 @@
     --chart-track: #20242c;
     --chart-grid: #232831;
     --chart-hover-band: rgba(139, 133, 255, 0.1);
+    --code-bg: #12151b;
+    --code-comment: #7d8590;
+    --code-keyword: #c792ea;
+    --code-string: #7ee787;
+    --code-number: #f0a35e;
+    --code-title: #a5a1ff;
+    --code-type: #79c0ff;
+    --code-meta: #ff8b8b;
   }
 }
 

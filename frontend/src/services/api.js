@@ -1,16 +1,27 @@
 // Cliente HTTP central. Todas as chamadas ao backend passam por aqui.
 const BASE_URL = '/api';
 
+const OFFLINE_MESSAGE = 'Não foi possível conectar ao servidor. Verifique se o backend está em execução.';
+
 export async function request(path, options = {}) {
-  const response = await fetch(`${BASE_URL}${path}`, {
-    ...options,
-    headers: { 'Content-Type': 'application/json', ...options.headers },
-  });
+  let response;
+  try {
+    response = await fetch(`${BASE_URL}${path}`, {
+      ...options,
+      headers: { 'Content-Type': 'application/json', ...options.headers },
+    });
+  } catch {
+    const error = new Error(OFFLINE_MESSAGE);
+    error.status = 0;
+    throw error;
+  }
 
   const data = await response.json().catch(() => null);
 
   if (!response.ok) {
-    const error = new Error(data?.error || `Erro ${response.status}`);
+    // Sem corpo JSON em erro 5xx/502: o proxy não alcançou o backend.
+    const fallback = response.status >= 500 ? OFFLINE_MESSAGE : `Erro ${response.status}`;
+    const error = new Error(data?.error || fallback);
     error.status = response.status;
     error.data = data;
     throw error;

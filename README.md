@@ -10,7 +10,8 @@ Gerenciador pessoal de demandas, registros de execução diária e relatórios g
 ## Executar
 
 ```bash
-# 1ª vez: instala dependências e cria o banco SQLite (backend/prisma/dev.db)
+# 1ª vez: instala dependências e cria/atualiza o banco SQLite (backend/prisma/dev.db)
+# (o iniciar-grimorium.cmd faz isso sozinho — ver "Uso diário" abaixo)
 cp backend/.env.example backend/.env   # se ainda não existir
 npm run setup
 
@@ -19,6 +20,22 @@ npm run dev
 ```
 
 Também é possível rodar separadamente: `npm run dev:backend` e `npm run dev:frontend`.
+
+### Uso diário (sem VS Code)
+
+Único pré-requisito: **Node.js** instalado ([nodejs.org](https://nodejs.org)).
+
+Dê dois cliques em **`iniciar-grimorium.cmd`** (ou no atalho **Grimorium** da Área de Trabalho). Ele:
+
+1. Se o Grimorium já estiver rodando, apenas abre o navegador.
+2. Cria `backend/.env` a partir do `.env.example`, se não existir.
+3. **No primeiro uso**, instala todas as dependências e cria o banco (alguns minutos, só uma vez).
+4. A cada abertura, aplica migrações pendentes do banco (`prisma migrate deploy` — nunca apaga dados).
+5. Sobe backend e frontend e abre o navegador quando estiver pronto.
+
+Para encerrar, feche a janela do terminal.
+
+Para recriar o atalho em outra máquina: botão direito em `iniciar-grimorium.cmd` → **Mostrar mais opções → Enviar para → Área de trabalho (criar atalho)**; em Propriedades → Alterar ícone, use `assets/grimorium.ico`.
 
 ## Validar
 
@@ -82,6 +99,51 @@ Testes automatizados da regra (banco isolado `test.db`): `npm test --prefix back
 | DELETE | `/api/activities/:id/logs/:logId` | remove registro |
 | GET | `/api/executions?date=YYYY-MM-DD` | atividades efetivamente executadas no dia |
 | GET | `/api/dashboard?from=YYYY-MM-DD&to=YYYY-MM-DD` | indicadores do período (máx. 366 dias) + situação atual |
+| GET | `/api/transfer/export?format=json\|csv\|csv-logs&from&to&ids&[filtros da lista]` | download do backup/planilha |
+| GET | `/api/transfer/export/preview?from&to&ids&[filtros]` | prévia: atividades e registros que sairão no arquivo |
+| POST | `/api/transfer/import` | importa um backup JSON (até 20 MB) |
+
+## Biblioteca
+
+Repositório pessoal de **passo a passo, testes, código/programação e anotações** (`/biblioteca`).
+
+- Conteúdo em **Markdown** com abas Escrever/Visualizar, destaque de sintaxe e botão de copiar em cada bloco de código. HTML embutido no texto não é executado.
+- Cada tipo começa com um modelo (ex.: Objetivo → Pré-requisitos → Passo a passo). Tags, resumo, entradas fixadas e busca por título/conteúdo/tag.
+- **Copiar como Markdown** gera o texto pronto para colar em chat, e-mail, GitHub ou Notion.
+- **Anexos** (até 25 MB, 10 por envio) ficam em `backend/storage/library/` com nome aleatório; só imagens comuns abrem no navegador, o resto é sempre baixado. Inclua essa pasta nos seus backups — o backup JSON de atividades ainda não cobre a Biblioteca.
+
+| Método | Rota | Descrição |
+|---|---|---|
+| GET | `/api/library?search&kind&tag` | lista (`kind`: `HOWTO`, `TEST`, `SNIPPET`, `NOTE`) |
+| GET | `/api/library/tags` | tags em uso com contagem |
+| GET/POST/PUT/DELETE | `/api/library[/:id]` | CRUD de entradas |
+| POST | `/api/library/:id/attachments` | upload multipart (campo `files`) |
+| GET/DELETE | `/api/library/:id/attachments/:attachmentId` | baixar (`?inline=1` para imagens) / excluir |
+| POST | `/api/library/import-github` | importa arquivo do GitHub/Gist por link (`{ url }`) |
+| POST | `/api/library/:id/sync-github` | atualiza o código importado (anotações preservadas) |
+| GET | `/api/library/github/status` | indica se há `GITHUB_TOKEN` configurado |
+
+### Importar do GitHub
+
+Cole o link de um arquivo (`github.com/…/blob/branch/caminho`, link raw ou Gist). O código fica **separado das anotações**: "Atualizar do GitHub" troca só o código. Importar o mesmo arquivo de novo abre a entrada existente. O backend só consulta `api.github.com` — o link é apenas interpretado.
+
+Repositórios **públicos** funcionam sem configuração. Para **privados**, crie um *fine-grained token* em GitHub → Settings → Developer settings → Personal access tokens, com acesso aos repositórios desejados e permissão **Contents: Read-only**, e coloque em `backend/.env` como `GITHUB_TOKEN=`.
+
+## Exportar e importar
+
+Na tela Demandas → **Exportar / Importar**:
+
+| Formato | Conteúdo | Importável |
+|---|---|---|
+| Backup completo (JSON) | atividades + todos os registros de execução | sim |
+| Planilha de atividades (CSV) | uma linha por demanda/contato, com totais | não |
+| Planilha de registros (CSV) | uma linha por execução | não |
+
+- **Recorte:** por período (7 dias, 30 dias — padrão —, este mês, tudo ou personalizado), opcionalmente com os filtros da lista, ou pelos **itens selecionados** na tabela. O painel mostra a prévia antes de baixar.
+- **Período:** entram as atividades com execução **ou** criação no período. Os CSVs trazem apenas os registros do período; o JSON leva o histórico **completo** de cada atividade incluída (backup íntegro — importar recortes diferentes depois não perde registros).
+- CSV pronto para Excel em português: separador `;`, UTF-8 com BOM, células iniciadas por `= + - @` são neutralizadas.
+- Cada atividade tem um `uid` universal. Importar o mesmo backup de novo (ou em outra conta que já o recebeu) ignora os itens existentes, sem duplicar.
+- Itens inválidos no arquivo são listados com o motivo; os válidos são importados normalmente.
 
 ## Indicadores do Dashboard
 
@@ -103,3 +165,12 @@ O período fica na URL (`/?periodo=7d`, `/?de=2026-11-01&ate=2026-11-15`) e os c
 3. ~~Dashboard (indicadores e gráficos por período)~~
 4. Relatórios (Claude API, PDF, histórico)
 5. Refinamentos
+
+### Objetivos futuros
+
+- **Aplicativo instalável (PWA):** manifesto + ícones + service worker para "Instalar" pelo Edge/Chrome e usar em janela própria, com ícone no menu Iniciar e na barra de tarefas.
+- **Servidor único de produção:** o backend serve o build do frontend em um só endereço (`npm start` → `http://localhost:3333`), sem o modo de desenvolvimento.
+- **Iniciar com o Windows:** servidor sobe sozinho em segundo plano ao ligar o PC (pré-requisito para o app instalado abrir sempre funcionando).
+- **Biblioteca no backup:** incluir entradas e anexos da Biblioteca na exportação/importação.
+- **Gerenciar categorias:** renomear, juntar e excluir categorias de demandas.
+- Itens do prompt original: integração com Google Chat, captura automática de demandas, Google Sheets, relatórios agendados e semanais, histórico de produtividade, sugestões de priorização por IA.

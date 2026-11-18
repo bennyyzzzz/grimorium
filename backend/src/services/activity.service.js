@@ -61,6 +61,34 @@ function dueFilter(due, today) {
   }
 }
 
+// ---------- Categorias padronizadas ----------
+
+// Chave de comparação: ignora maiúsculas, acentos e espaços extras ("  dúvida " ≡ "Duvida").
+export const categoryKey = (value) =>
+  value.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/\s+/g, ' ').trim().toLowerCase();
+
+/**
+ * Reaproveita a grafia de uma categoria já existente equivalente à informada.
+ * Ex.: existe "Dúvida" e o usuário digita "duvida" → grava "Dúvida". Evita categorias duplicadas
+ * nos filtros e nos gráficos do dashboard.
+ */
+export async function canonicalCategory(category, client = prisma) {
+  if (!category) return category;
+  const typed = category.replace(/\s+/g, ' ').trim();
+  const key = categoryKey(typed);
+  const existing = await client.activity.findMany({
+    where: { category: { not: null } },
+    select: { category: true },
+    distinct: ['category'],
+    orderBy: { createdAt: 'asc' }, // a grafia mais antiga é a referência
+  });
+  return existing.find((row) => categoryKey(row.category) === key)?.category ?? typed;
+}
+
+async function withCanonicalCategory(data, client) {
+  return data.category ? { ...data, category: await canonicalCategory(data.category, client) } : data;
+}
+
 async function findOrFail(client, id) {
   const activity = await client.activity.findUnique({ where: { id } });
   if (!activity) throw new AppError('Demanda não encontrada', 404);
@@ -87,8 +115,8 @@ async function registerExecution(
 
 // ---------- CRUD ----------
 
-export async function listActivities(filters = {}) {
-  const today = toDateKey();
+// Monta o `where` do Prisma a partir dos filtros da lista (reutilizado pela exportação).
+export function buildActivityWhere(filters = {}, today = toDateKey()) {
   const and = [];
 
   if (filters.type) and.push({ type: filters.type });
@@ -106,9 +134,13 @@ export async function listActivities(filters = {}) {
   }
   const due = dueFilter(filters.due, today);
   if (due) and.push(due);
+  return { AND: and };
+}
 
+export async function listActivities(filters = {}) {
+  const today = toDateKey();
   const activities = await prisma.activity.findMany({
-    where: { AND: and },
+    where: buildActivityWhere(filters, today),
     include: {
       _count: { select: { logs: true } },
       logs: { select: { executionDate: true }, orderBy: logsOrder, take: 1 },
@@ -118,14 +150,17 @@ export async function listActivities(filters = {}) {
   return activities.map((a) => serializeListItem(a, today)).sort(compareActivities);
 }
 
+// Categorias para sugestões e filtros (sem variações equivalentes repetidas), em ordem alfabética.
 export async function listCategories() {
   const rows = await prisma.activity.findMany({
     where: { category: { not: null } },
     select: { category: true },
     distinct: ['category'],
-    orderBy: { category: 'asc' },
+    orderBy: { createdAt: 'asc' },
   });
-  return rows.map((r) => r.category);
+  const byKey = new Map();
+  for (const { category } of rows) if (!byKey.has(categoryKey(category))) byKey.set(categoryKey(category), category);
+  return [...byKey.values()].sort((a, b) => a.localeCompare(b, 'pt-BR'));
 }
 
 export async function getActivity(id) {
@@ -139,7 +174,7 @@ export async function getActivity(id) {
 
 export async function createActivity(data) {
   const { channel, contactName, ...taskData } = data; // demandas não têm campos de contato
-  const activity = await prisma.activity.create({ data: { ...taskData, type: 'TASK' } });
+  const activity = await prisma.activity.create({ data: { ...(await withCanonicalCategory(taskData)), type: 'TASK' } });
   return getActivity(activity.id);
 }
 
@@ -181,7 +216,7 @@ export async function createContact({
       title,
       contactName,
       channel,
-      category,
+      category: await canonicalCategory(category),
       importance,
       dueDate: followUp ? dueDate : null,
       status: followUp ? 'IN_PROGRESS' : 'COMPLETED',
@@ -199,7 +234,7 @@ export async function createContact({
 }
 
 export async function updateActivity(id, data) {
-  await prisma.activity.update({ where: { id }, data });
+  await prisma.activity.update({ where: { id }, data: await withCanonicalCategory(data) });
   return getActivity(id);
 }
 

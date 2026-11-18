@@ -130,6 +130,28 @@ export function parsePeriod(query = {}) {
   return { from, to };
 }
 
+const MAX_EXPORT_IDS = 1000;
+
+/**
+ * Parâmetros da exportação:
+ * - filtros da lista (type, status, importance, category, due, search);
+ * - período opcional (from/to): atividades com execução ou criação no período;
+ * - ids opcionais (seleção manual, separados por vírgula).
+ */
+export function parseExportQuery(query = {}) {
+  const options = { filters: parseListFilters(query), period: null, ids: null };
+
+  if (query.from || query.to) options.period = parsePeriod(query);
+
+  if (query.ids) {
+    const ids = String(query.ids).split(',').filter(Boolean).map(parseId);
+    if (ids.length > MAX_EXPORT_IDS) throw new AppError(`Selecione no máximo ${MAX_EXPORT_IDS} itens por exportação`);
+    options.ids = [...new Set(ids)];
+  }
+
+  return options;
+}
+
 export function parseListFilters(query = {}) {
   const filters = {};
   if (query.type) filters.type = oneOf(query.type, TYPES, 'Tipo');
