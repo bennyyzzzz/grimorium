@@ -13,30 +13,42 @@ Gerenciador pessoal de demandas, registros de execução diária, biblioteca de 
 
 ## Requisitos
 
-- **Node.js 20.19+ ou 22.12+** (testado com 22). Versões mais antigas falham: o Vite 7 exige essa faixa e o backend usa `node --env-file`, que não existe no Node 18.
-- Com [nvm](https://github.com/nvm-sh/nvm): `nvm use 22` na sessão atual e `nvm alias default 22` para tornar o 22 o padrão em terminais novos.
+- **Node.js 20.19+ ou 22.12+** (testado com 22; o projeto indica a 22 em `.nvmrc`). Versões mais antigas falham: o Vite 7 exige essa faixa e o backend usa `node --env-file`, que não existe no Node 18. O Grimorium verifica a versão ao iniciar e explica o que instalar.
+- **Windows:** instalador LTS em [nodejs.org](https://nodejs.org).
+- **Linux / WSL / macOS** com [nvm](https://github.com/nvm-sh/nvm): `nvm install 22`, depois `nvm use 22` na sessão atual e `nvm alias default 22` para tornar o 22 o padrão em terminais novos.
 
 ## Executar
 
-```bash
-cp backend/.env.example backend/.env   # se ainda não existir
-npm run setup                          # 1ª vez: dependências e banco (backend/prisma/dev.db)
-npm run dev                            # backend :3333 + frontend :5173
-```
+Escolha conforme o sistema — a preparação é automática em todos:
 
-Backend e frontend também rodam separados: `npm run dev:backend` e `npm run dev:frontend`.
+| Sistema | Como iniciar |
+|---|---|
+| **Windows** | dois cliques em **`iniciar-grimorium.cmd`** (ou no atalho **Grimorium** da Área de Trabalho) |
+| **Linux / WSL / macOS** | `sh iniciar-grimorium.sh` |
+| **Qualquer terminal** | `npm start` (abre o navegador) ou `npm run dev` (sem abrir) |
+
+Endereços: frontend em `http://localhost:5173`, API em `http://localhost:3333`. Para encerrar, feche a janela do terminal ou pressione Ctrl+C.
+
+### O que a preparação faz sozinha
+
+Antes de subir, `npm start`, `npm run dev` e `npm run setup` executam [`scripts/preflight.mjs`](scripts/preflight.mjs), que:
+
+1. Confere a versão do Node.js e explica o que instalar, se for antiga.
+2. Cria `backend/.env` a partir do `.env.example`, se não existir.
+3. Instala as dependências da raiz, do backend e do frontend quando faltam, quando foram instaladas **em outro sistema** (ex.: WSL × Windows na mesma pasta) ou quando o `package-lock.json` mudou (ex.: depois de um `git pull`). Usa `npm ci`, que **não altera** os lockfiles versionados.
+4. Gera o Prisma Client se o schema mudou e aplica migrações pendentes (`prisma migrate deploy`, que nunca apaga dados).
+
+Na primeira vez leva alguns minutos; depois, poucos segundos. Se precisar reinstalar algo com o Grimorium aberto, ele pede para fechar antes (evita corromper a instalação).
+
+> **WSL e Windows:** escolha **um** dos dois para rodar o projeto. As dependências são específicas de cada sistema; se alternar, a preparação reinstala tudo a cada troca. No WSL, pastas Linux (ex.: `~/grimorium`) são bem mais rápidas que `/mnt/c` ou `/mnt/d`.
+
+Backend e frontend também rodam separados: `npm run dev:backend` e `npm run dev:frontend` (sem a preparação automática).
 
 ### Uso diário no Windows (sem VS Code)
 
-Pré-requisito: [Node.js](https://nodejs.org) instalado. Dê dois cliques em **`iniciar-grimorium.cmd`** (ou no atalho **Grimorium** da Área de Trabalho). Ele:
+Dê dois cliques em **`iniciar-grimorium.cmd`** ou no atalho **Grimorium** da Área de Trabalho. Se o Grimorium já estiver rodando, ele só abre o navegador; senão, prepara tudo (acima), sobe o sistema e abre o navegador quando estiver pronto.
 
-1. Só abre o navegador, se o Grimorium já estiver rodando.
-2. Cria `backend/.env` a partir do `.env.example`, se não existir.
-3. No primeiro uso, instala as dependências e cria o banco (alguns minutos, uma vez só).
-4. A cada abertura, aplica migrações pendentes (`prisma migrate deploy`, que nunca apaga dados).
-5. Sobe backend e frontend e abre o navegador quando estiver pronto.
-
-Para encerrar, feche a janela do terminal. Para recriar o atalho em outra máquina: botão direito em `iniciar-grimorium.cmd` → **Mostrar mais opções → Enviar para → Área de trabalho (criar atalho)**; em Propriedades → Alterar ícone, use `assets/grimorium.ico`.
+Para recriar o atalho em outra máquina: botão direito em `iniciar-grimorium.cmd` → **Mostrar mais opções → Enviar para → Área de trabalho (criar atalho)**; em Propriedades → Alterar ícone, use `assets/grimorium.ico`.
 
 ## ⚠️ Seus dados ficam só neste computador
 
@@ -203,6 +215,8 @@ frontend/
     services/api.js          cliente HTTP central
     styles/                  global.css (tokens), ui.css (componentes), glass.css (Liquid Glass)
 docs/                        guias (ex.: levar o banco para outro computador)
+scripts/preflight.mjs        preparação automática antes de iniciar (Node, .env, dependências, banco)
+iniciar-grimorium.cmd / .sh  inicialização no Windows / Linux, WSL e macOS
 ```
 
 ## Problemas comuns
@@ -212,6 +226,8 @@ docs/                        guias (ex.: levar o banco para outro computador)
 | `node: bad option: --env-file=.env` | Node antigo (18 ou menor). Rode `nvm use 22`. |
 | `crypto.hash is not a function` ou aviso "Vite requires Node.js version 20.19+" | Mesma causa. Use Node 20.19+ ou 22.12+. |
 | A versão volta para a antiga ao abrir outro terminal | O `nvm use` vale só para o terminal atual. Rode `nvm alias default 22` uma vez. |
+| "As dependências precisam ser (re)instaladas, mas o Grimorium está em execução" | Feche o Grimorium (janela do terminal ou `npm run dev`) e inicie de novo. |
+| Lentidão no WSL ou reinstalação a cada abertura | Rode o projeto em **um** ambiente só (WSL ou Windows) e, no WSL, numa pasta Linux (`~/grimorium`). |
 | "Indicador vermelho: API offline" | O backend não subiu. Veja o terminal (`[api]`) e confira o `backend/.env`. |
 | Importar do GitHub recusa o link | Use o link de um arquivo (`…/blob/branch/caminho/arquivo`), não de um repositório ou pasta. |
 | Repositório privado não importa | Configure `GITHUB_TOKEN` em `backend/.env` e reinicie o backend. |

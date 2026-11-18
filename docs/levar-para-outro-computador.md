@@ -82,6 +82,8 @@ Backups `.json` gerados antes dessa versão também são aceitos (eles contêm s
 | Sintoma | Solução |
 |---|---|
 | “Node.js/npm não encontrado” | Instale o Node.js e abra o `iniciar-grimorium.cmd` de novo. |
+| “Node.js 18… não é suportado” | Instale o Node.js **LTS** (20.19+ ou 22.12+) e abra um terminal novo antes de iniciar. |
+| O destino é Linux, WSL ou macOS | Use `sh iniciar-grimorium.sh` (ou `npm start`) no lugar do `.cmd`; o resto do passo a passo é igual. |
 | A instalação falha no meio | Verifique a internet e abra o `iniciar-grimorium.cmd` de novo; ele retoma a instalação. |
 | Grimorium abre vazio | O `dev.db` não foi copiado para `backend\prisma\` (ou o Grimorium criou um banco novo antes da cópia). Feche, coloque o `dev.db` da origem no lugar e abra de novo. |
 | Erros ao abrir depois de copiar só o `dev.db` | O banco pode ter vindo de uma versão **mais nova** do Grimorium que a instalada no destino. Prefira sempre copiar a **pasta inteira** da origem (código + banco juntos), como no caminho A. |

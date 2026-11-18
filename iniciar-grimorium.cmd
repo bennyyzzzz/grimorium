@@ -1,7 +1,6 @@
 @echo off
-rem Inicia o Grimorium (backend + frontend) e abre o navegador quando estiver pronto.
-rem Uso: dois cliques neste arquivo (ou no atalho da Area de Trabalho).
-rem No primeiro uso, instala as dependencias sozinho. A cada abertura, aplica migracoes pendentes do banco.
+rem Inicia o Grimorium no Windows: dois cliques neste arquivo (ou no atalho da Area de Trabalho).
+rem A preparacao (Node, .env, dependencias, banco) fica em scripts\preflight.mjs, executado pelo "npm start".
 chcp 65001 >nul
 title Grimorium
 cd /d "%~dp0"
@@ -17,54 +16,20 @@ if %errorlevel%==0 (
 
 where npm >nul 2>nul
 if errorlevel 1 (
-  echo Node.js/npm não encontrado. Instale o Node.js em https://nodejs.org e tente novamente.
+  echo Node.js/npm não encontrado. Instale o Node.js LTS em https://nodejs.org e tente novamente.
   pause
   exit /b 1
 )
 
-rem Configuração do backend: cria o .env a partir do modelo, se ainda não existir.
-if not exist "backend\.env" (
-  echo Criando backend\.env a partir do modelo...
-  copy "backend\.env.example" "backend\.env" >nul
-)
-
-rem Primeiro uso (ou dependências apagadas): instala tudo.
-set NEEDS_SETUP=0
-if not exist "node_modules" set NEEDS_SETUP=1
-if not exist "backend\node_modules" set NEEDS_SETUP=1
-if not exist "frontend\node_modules" set NEEDS_SETUP=1
-
-if "%NEEDS_SETUP%"=="1" (
-  echo.
-  echo   Primeira execução: instalando as dependências. Isso pode levar alguns minutos...
-  echo.
-  call npm run setup
-  if errorlevel 1 goto :falha
-) else (
-  rem Aplica migrações novas do banco, se houver. Nunca apaga dados.
-  call npm run prisma:deploy --prefix backend --silent >nul 2>&1
-  if errorlevel 1 (
-    echo Falha ao atualizar o banco de dados. Detalhes:
-    call npm run prisma:deploy --prefix backend
-    goto :falha
-  )
-)
-
 echo.
 echo   Invocando o Grimorium...
+echo   Na primeira vez, as dependências são instaladas, o que pode levar alguns minutos.
 echo   O navegador abre sozinho quando estiver pronto.
 echo   Para encerrar, feche esta janela ou pressione Ctrl+C.
 echo.
-call npm run start:local
+call npm start
 
-rem Se os servidores pararem por erro, mantém a janela aberta para ler a mensagem.
+rem Mantém a janela aberta para ler eventuais mensagens de erro.
 echo.
-echo O Grimorium foi encerrado.
+echo O Grimorium foi encerrado. Se apareceu algum erro acima, leia a mensagem antes de fechar.
 pause
-exit /b 0
-
-:falha
-echo.
-echo Não foi possível iniciar o Grimorium. Leia a mensagem acima.
-pause
-exit /b 1

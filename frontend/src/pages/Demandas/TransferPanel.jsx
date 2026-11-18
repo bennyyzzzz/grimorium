@@ -131,7 +131,7 @@ export default function TransferPanel({ filters, filteredCount, selectedIds, onS
     const parts = [
       `${plural(preview.activities, 'atividade', 'atividades')} (${plural(preview.logs, 'registro', 'registros')})`,
     ];
-    if (withLibrary && preview.library) {
+    if (withLibrary && preview.library?.entries > 0) {
       const { entries, attachments, bytes } = preview.library;
       parts.push(
         `${plural(entries, 'entrada', 'entradas')} da Biblioteca` +
