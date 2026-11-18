@@ -5,6 +5,7 @@ import App from './App.jsx';
 import ConfirmProvider from './components/ConfirmDialog/ConfirmProvider.jsx';
 import './styles/global.css';
 import './styles/ui.css';
+import './styles/glass.css';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

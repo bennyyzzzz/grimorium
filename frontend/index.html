@@ -3,8 +3,21 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light dark" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>Grimorium</title>
+    <script>
+      // Aplica o tema antes da pintura (sincronizar com hooks/useTheme.js).
+      (function () {
+        var pref = 'system';
+        try {
+          var saved = localStorage.getItem('grimorium-theme');
+          if (saved === 'light' || saved === 'dark') pref = saved;
+        } catch (e) {}
+        var dark = pref === 'dark' || (pref === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

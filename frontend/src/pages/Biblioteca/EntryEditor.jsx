@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
+import BackLink from '../../components/BackLink/BackLink.jsx';
 import Markdown from '../../components/Markdown/Markdown.jsx';
 import Summoning from '../../components/Summoning/Summoning.jsx';
 import { ENTRY_KIND, ENTRY_TEMPLATES, MAX_ATTACHMENT_SIZE, formatBytes } from '../../constants/library.js';
@@ -170,9 +171,7 @@ export default function EntryEditor() {
   if (!values) {
     return error ? (
       <div className="entry-page">
-        <Link to="/biblioteca" className="back-link">
-          ← Biblioteca
-        </Link>
+        <BackLink to="/biblioteca">Biblioteca</BackLink>
         <p className="form-error">{error}</p>
       </div>
     ) : (
@@ -189,9 +188,7 @@ export default function EntryEditor() {
       }}
     >
       <div className="editor-top">
-        <button type="button" className="back-link" onClick={cancel}>
-          ← {isNew ? 'Biblioteca' : 'Voltar para a entrada'}
-        </button>
+        <BackLink onClick={cancel}>{isNew ? 'Biblioteca' : 'Voltar para a entrada'}</BackLink>
         <span className="muted editor-hint">{dirty ? 'Alterações não salvas · Ctrl+S salva' : 'Ctrl+S salva'}</span>
       </div>
 

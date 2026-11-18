@@ -1,59 +1,86 @@
 .layout {
   display: grid;
-  /* minmax(0, 1fr): a coluna de conteúdo não cresce além da tela por causa de filhos largos */
-  grid-template-columns: 220px minmax(0, 1fr);
+  /* minmax(0, 1fr) evita estouro por filhos largos */
+  grid-template-columns: 248px minmax(0, 1fr);
   min-height: 100vh;
 }
 
 .sidebar {
+  position: sticky;
+  top: 0;
+  align-self: start;
+  height: 100vh;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
-  padding: var(--space-5) var(--space-3);
-  background: var(--surface);
+  gap: var(--space-5);
+  padding: var(--space-5) var(--space-3) var(--space-4);
+  background: var(--sidebar-bg);
+  -webkit-backdrop-filter: saturate(180%) blur(24px);
+  backdrop-filter: saturate(180%) blur(24px);
   border-right: 1px solid var(--border);
 }
 
 .brand {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
-  padding: 0 var(--space-3);
-  font-size: 1.125rem;
+  gap: var(--space-3);
+  padding: 0 var(--space-2);
+  font-size: 1.1875rem;
   font-weight: 700;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.03em;
+}
+
+/* Ícone de app (squircle) */
+.brand-mark {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  background: linear-gradient(160deg, #ff8cc8 0%, #d6247f 100%);
+  color: #ffffff;
+  box-shadow: 0 2px 6px rgba(214, 36, 127, 0.35), inset 0 0 0 0.5px rgba(255, 255, 255, 0.25);
+  flex-shrink: 0;
 }
 
 .brand-sigil {
   width: 22px;
   height: 22px;
-  color: var(--accent);
-  flex-shrink: 0;
 }
 
 .nav {
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
+  gap: 2px;
 }
 
 .nav-link {
-  padding: var(--space-2) var(--space-3);
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 9px var(--space-3);
   border-radius: var(--radius);
   color: var(--text-muted);
   text-decoration: none;
   font-weight: 500;
+  transition: background-color var(--transition), color var(--transition);
 }
 
+.nav-icon { flex-shrink: 0; opacity: 0.85; }
+
 .nav-link:hover {
-  background: var(--surface-hover);
+  background: var(--fill);
   color: var(--text);
 }
 
 .nav-link.active {
-  background: var(--accent-soft);
-  color: var(--accent);
+  background: var(--accent);
+  color: var(--on-accent);
+  font-weight: 600;
 }
+.nav-link.active .nav-icon { opacity: 1; }
 
 .sidebar-footer {
   margin-top: auto;
@@ -65,7 +92,7 @@
 .data-note {
   margin: 0;
   padding: var(--space-2) var(--space-3);
-  border: 1px dashed var(--border);
+  border: 1px dashed var(--border-strong);
   border-radius: var(--radius);
   font-size: 0.75rem;
   line-height: 1.45;
@@ -85,7 +112,7 @@
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  padding: 0 var(--space-3);
+  padding: 0 var(--space-2);
   font-size: 0.8125rem;
   color: var(--text-muted);
 }
@@ -97,12 +124,12 @@
   background: var(--text-muted);
 }
 
-.health-ok .health-dot { background: var(--success); }
-.health-degraded .health-dot { background: var(--warning); }
-.health-offline .health-dot { background: var(--danger); }
+.health-ok .health-dot { background: var(--success); box-shadow: 0 0 0 3px var(--success-soft); }
+.health-degraded .health-dot { background: var(--warning); box-shadow: 0 0 0 3px var(--warning-soft); }
+.health-offline .health-dot { background: var(--danger); box-shadow: 0 0 0 3px var(--danger-soft); }
 
 .content {
-  padding: var(--space-6);
+  padding: var(--space-6) 40px;
   min-width: 0;
 }
 
@@ -113,18 +140,23 @@
   }
 
   .sidebar {
+    position: static;
+    height: auto;
+    overflow: visible;
     flex-direction: row;
     align-items: center;
     flex-wrap: wrap;
+    gap: var(--space-3);
     padding: var(--space-3) var(--space-4);
     border-right: none;
     border-bottom: 1px solid var(--border);
   }
 
   .brand { padding: 0; margin-right: var(--space-2); }
-  .nav { flex-direction: row; }
-  .sidebar-footer { margin-top: 0; margin-left: auto; }
-  .data-note { display: none; } /* em telas pequenas, o aviso completo fica no painel de backup */
+  .nav { flex-direction: row; flex-wrap: wrap; }
+  .nav-link { padding: 7px var(--space-3); }
+  .sidebar-footer { margin-top: 0; margin-left: auto; flex-direction: row; align-items: center; }
+  .data-note { display: none; } /* o aviso completo fica no painel de backup */
   .health { padding: 0; }
   .content { padding: var(--space-4); }
 }
