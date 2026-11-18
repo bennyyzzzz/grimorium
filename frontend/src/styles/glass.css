@@ -10,9 +10,6 @@
     0 0 0 0.5px rgba(0, 0, 0, 0.06);
   --glass-shadow: 0 8px 32px rgba(120, 60, 110, 0.12);
   --glass-blur: blur(24px) saturate(180%);
-  --bg-glow: radial-gradient(60rem 40rem at 6% -8%, rgba(255, 140, 200, 0.5), transparent 60%),
-    radial-gradient(50rem 36rem at 100% 0%, rgba(190, 160, 255, 0.4), transparent 60%),
-    radial-gradient(60rem 40rem at 55% 112%, rgba(255, 190, 160, 0.38), transparent 60%);
 }
 
 :root[data-theme='dark'] {
@@ -24,9 +21,6 @@
   --glass-edge: inset 0 1px 0 rgba(255, 255, 255, 0.22), inset 0 -1px 0 rgba(255, 255, 255, 0.04),
     0 0 0 0.5px rgba(255, 255, 255, 0.06);
   --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
-  --bg-glow: radial-gradient(60rem 40rem at 6% -8%, rgba(255, 60, 160, 0.26), transparent 60%),
-    radial-gradient(50rem 36rem at 100% 0%, rgba(120, 80, 255, 0.24), transparent 60%),
-    radial-gradient(60rem 40rem at 55% 112%, rgba(255, 100, 120, 0.14), transparent 60%);
 }
 
 /* Sem desfoque ou com "reduzir transparência": superfícies sólidas */
@@ -37,24 +31,7 @@
     --glass-input: var(--surface);
     --glass-sheen: linear-gradient(transparent, transparent);
     --glass-blur: none;
-    --bg-glow: linear-gradient(transparent, transparent);
   }
-}
-
-@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  :root, :root[data-theme='dark'] {
-    --glass-bg: var(--surface);
-    --glass-bg-strong: var(--surface);
-    --glass-sheen: linear-gradient(transparent, transparent);
-    --glass-blur: none;
-  }
-}
-
-body {
-  min-height: 100vh;
-  background: var(--bg-glow), var(--bg);
-  background-attachment: fixed;
-}
 
 /* :root dá prioridade sobre os CSS carregados sob demanda */
 :root .sidebar,
