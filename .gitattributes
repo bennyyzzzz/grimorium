@@ -1,0 +1,7 @@
+# Quebras de linha fixas por tipo de arquivo, independentemente da configuração de quem clona.
+* text=auto
+*.cmd text eol=crlf
+*.bat text eol=crlf
+*.sh text eol=lf
+*.ico binary
+*.png binary
