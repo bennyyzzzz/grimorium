@@ -6,8 +6,9 @@
   align-items: flex-start;
   justify-content: center;
   padding: 6vh var(--space-4) var(--space-4);
-  background: rgba(15, 17, 21, 0.45);
+  background: var(--overlay);
   overflow-y: auto;
+  backdrop-filter: blur(2px);
 }
 
 .modal {
@@ -15,7 +16,7 @@
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.18);
+  box-shadow: var(--shadow-lg);
 }
 
 .modal-md { max-width: 520px; }

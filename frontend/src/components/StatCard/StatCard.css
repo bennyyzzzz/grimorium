@@ -9,9 +9,11 @@
   color: inherit;
   text-decoration: none;
   min-width: 0;
+  box-shadow: var(--shadow-sm);
+  transition: border-color var(--transition), box-shadow var(--transition), transform var(--transition);
 }
 
-.stat-card-link:hover { border-color: var(--accent); }
+.stat-card-link:hover { border-color: var(--accent); box-shadow: var(--shadow-md); transform: translateY(-1px); }
 
 .stat-label {
   font-size: 0.8125rem;

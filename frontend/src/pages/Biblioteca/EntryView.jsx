@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
+import BackLink from '../../components/BackLink/BackLink.jsx';
 import Markdown from '../../components/Markdown/Markdown.jsx';
 import CopyButton from '../../components/CopyButton/CopyButton.jsx';
 import Summoning from '../../components/Summoning/Summoning.jsx';
@@ -107,9 +108,7 @@ export default function EntryView() {
   if (!entry) {
     return error ? (
       <div className="entry-page">
-        <Link to="/biblioteca" className="back-link">
-          ← Biblioteca
-        </Link>
+        <BackLink to="/biblioteca">Biblioteca</BackLink>
         <p className="form-error">{error}</p>
       </div>
     ) : (
@@ -119,9 +118,7 @@ export default function EntryView() {
 
   return (
     <article className="entry-page">
-      <Link to="/biblioteca" className="back-link">
-        ← Biblioteca
-      </Link>
+      <BackLink to="/biblioteca">Biblioteca</BackLink>
 
       <header className="entry-header">
         <div className="entry-header-main">
