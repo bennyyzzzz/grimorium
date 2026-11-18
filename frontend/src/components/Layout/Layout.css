@@ -1,6 +1,6 @@
 .layout {
   display: grid;
-  /* minmax(0, 1fr): a coluna de conteúdo não cresce além da tela por causa de filhos largos */
+  /* minmax(0, 1fr) evita estouro por filhos largos */
   grid-template-columns: 236px minmax(0, 1fr);
   min-height: 100vh;
 }
@@ -31,7 +31,7 @@
   letter-spacing: -0.03em;
 }
 
-/* Ícone de aplicativo: "squircle" com degradê, como no macOS e no iOS */
+/* Ícone de app (squircle) */
 .brand-mark {
   display: grid;
   place-items: center;
@@ -156,7 +156,7 @@
   .nav { flex-direction: row; flex-wrap: wrap; }
   .nav-link { padding: 7px var(--space-3); }
   .sidebar-footer { margin-top: 0; margin-left: auto; flex-direction: row; align-items: center; }
-  .data-note { display: none; } /* em telas pequenas, o aviso completo fica no painel de backup */
+  .data-note { display: none; } /* o aviso completo fica no painel de backup */
   .health { padding: 0; }
   .content { padding: var(--space-4); }
 }

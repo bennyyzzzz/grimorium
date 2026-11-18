@@ -1,12 +1,4 @@
-/*
- * Tokens de design, inspirados nas Human Interface Guidelines da Apple:
- * fundo cinza-claro, cartões brancos, azul de sistema como cor de destaque,
- * cantos bem arredondados, sombras suaves e superfícies translúcidas.
- *
- * O tema é definido pelo atributo data-theme ("light" | "dark") no <html>.
- * O script de index.html e o hook useTheme resolvem a preferência do usuário
- * (claro, escuro ou sistema) para um desses dois valores.
- */
+/* Tokens de design. O tema vem de data-theme ("light" | "dark") no <html>. */
 
 :root {
   /* Superfícies e texto */
@@ -101,7 +93,7 @@
   --accent: #ff5fae;
   --accent-hover: #ff7bbd;
   --accent-soft: rgba(255, 95, 174, 0.18);
-  --on-accent: #1a0010; /* texto escuro: o rosa claro não tem contraste suficiente com branco */
+  --on-accent: #1a0010; /* texto escuro: contraste com o rosa claro */
   --focus-ring: rgba(255, 95, 174, 0.4);
 
   --success: #30d158;

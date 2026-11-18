@@ -16,7 +16,7 @@ function ChevronLeft() {
   );
 }
 
-/** Botão de voltar: vira <Link> quando recebe `to`, ou <button> quando recebe `onClick`. */
+/** Voltar: <Link> com `to`, <button> com `onClick`. */
 export default function BackLink({ to, onClick, children }) {
   const content = (
     <>

@@ -23,11 +23,11 @@ function apply(preference) {
   document.documentElement.setAttribute('data-theme', resolve(preference));
 }
 
-/** Preferência de tema ("light" | "dark" | "system"), salva no navegador. */
+/** Preferência de tema: "light", "dark" ou "system". */
 export function useTheme() {
   const [preference, setPreference] = useState(readPreference);
 
-  // Aplica a escolha e, no modo "sistema", acompanha mudanças do sistema operacional.
+  // Aplica a escolha e acompanha o sistema no modo "sistema".
   useEffect(() => {
     apply(preference);
     if (preference !== 'system') return undefined;
@@ -37,7 +37,7 @@ export function useTheme() {
     return () => media.removeEventListener('change', onChange);
   }, [preference]);
 
-  // Sincroniza abas abertas ao mesmo tempo.
+  // Sincroniza abas abertas.
   useEffect(() => {
     const onStorage = (event) => {
       if (event.key === STORAGE_KEY) setPreference(readPreference());
@@ -51,7 +51,7 @@ export function useTheme() {
       if (next === 'system') localStorage.removeItem(STORAGE_KEY);
       else localStorage.setItem(STORAGE_KEY, next);
     } catch {
-      // armazenamento indisponível: a escolha vale só nesta sessão
+      // sem armazenamento: vale só nesta sessão
     }
     setPreference(next);
   }, []);
