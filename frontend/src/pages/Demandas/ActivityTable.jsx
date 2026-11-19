@@ -1,18 +1,6 @@
 import Badge, { ImportanceBadge, StatusBadge } from '../../components/Badge/Badge.jsx';
-import { CHANNEL } from '../../constants/activity.js';
 import { formatDateKey } from '../../utils/date.js';
-
-// Linha secundária: para contatos, "Contato · WhatsApp · Maria · Categoria"; para demandas, a categoria.
-function subtitle(a) {
-  const parts =
-    a.type === 'CONTACT' ? ['Contato', CHANNEL[a.channel]?.label, a.contactName, a.category] : [a.category];
-  return parts.filter(Boolean).join(' · ');
-}
-
-const QUICK_ACTION = {
-  PENDING: { status: 'IN_PROGRESS', label: 'Iniciar' },
-  IN_PROGRESS: { status: 'COMPLETED', label: 'Concluir' },
-};
+import { QUICK_ACTION, activitySubtitle as subtitle } from './activityView.js';
 
 /**
  * Tabela de demandas e contatos.

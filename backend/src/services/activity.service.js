@@ -61,6 +61,28 @@ function dueFilter(due, today) {
   }
 }
 
+const PERIOD_DAYS = { today: 1, '7d': 7, '30d': 30 };
+
+/**
+ * Filtro de período da lista: demandas em aberto sempre aparecem (não somem trabalhos pendentes);
+ * concluídas, canceladas e contatos só se tiveram movimento no período —
+ * criação, registro de execução ou conclusão.
+ */
+function periodFilter(period, today) {
+  const days = PERIOD_DAYS[period];
+  if (!days) return null;
+  const from = addDays(today, -(days - 1));
+  const since = new Date(`${from}T00:00:00`);
+  return {
+    OR: [
+      { status: { in: OPEN_STATUSES } },
+      { logs: { some: { executionDate: { gte: from } } } },
+      { createdAt: { gte: since } },
+      { completedAt: { gte: since } },
+    ],
+  };
+}
+
 // ---------- Categorias padronizadas ----------
 
 // Chave de comparação: ignora maiúsculas, acentos e espaços extras ("  dúvida " ≡ "Duvida").
@@ -134,6 +156,8 @@ export function buildActivityWhere(filters = {}, today = toDateKey()) {
   }
   const due = dueFilter(filters.due, today);
   if (due) and.push(due);
+  const period = periodFilter(filters.period, today);
+  if (period) and.push(period);
   return { AND: and };
 }
 

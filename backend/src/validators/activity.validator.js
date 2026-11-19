@@ -4,6 +4,7 @@ import { isDateKey, toDateKey } from '../utils/date.js';
 export const IMPORTANCES = ['HIGH', 'MEDIUM', 'LOW'];
 export const STATUSES = ['PENDING', 'IN_PROGRESS', 'COMPLETED', 'CANCELED'];
 export const DUE_FILTERS = ['overdue', 'today', 'week', 'none'];
+export const LIST_PERIODS = ['today', '7d', '30d'];
 export const TYPES = ['TASK', 'CONTACT'];
 export const CHANNELS = ['CHAT', 'WHATSAPP', 'CALL', 'EMAIL', 'MEETING', 'OTHER'];
 
@@ -164,6 +165,7 @@ export function parseListFilters(query = {}) {
   if (query.importance) filters.importance = oneOf(query.importance, IMPORTANCES, 'Prioridade');
   if (query.category) filters.category = String(query.category);
   if (query.due) filters.due = oneOf(query.due, DUE_FILTERS, 'Filtro de prazo');
+  if (query.period) filters.period = oneOf(query.period, LIST_PERIODS, 'Período');
   if (query.search) filters.search = String(query.search).trim();
   return filters;
 }

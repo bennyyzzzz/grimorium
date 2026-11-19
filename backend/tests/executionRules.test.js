@@ -175,3 +175,28 @@ test('demanda vencida e aberta é marcada como atrasada', async () => {
   assert.deepEqual(overdue.map((x) => x.id), [late.id]);
   assert.equal(overdue[0].isOverdue, true);
 });
+
+test('filtro de período: abertas sempre aparecem; fechadas só com movimento no período', async () => {
+  const old = new Date('2020-01-01T12:00:00');
+  const backdate = (id, extra = {}) =>
+    prisma.activity.update({ where: { id }, data: { createdAt: old, ...extra } });
+
+  const oldPending = await newActivity('Pendente antiga');
+  await backdate(oldPending.id);
+
+  const oldDone = await newActivity('Concluída antiga');
+  await activities.changeStatus(oldDone.id, 'COMPLETED', { date: '2020-01-01' });
+  await backdate(oldDone.id, { completedAt: old });
+
+  const doneToday = await newActivity('Concluída hoje');
+  await activities.changeStatus(doneToday.id, 'COMPLETED');
+  await backdate(doneToday.id); // criada há muito tempo, mas concluída hoje
+
+  const contactOld = await activities.createContact({ title: 'Contato antigo', channel: 'CHAT', date: '2020-01-01' });
+  await backdate(contactOld.id, { completedAt: old });
+
+  const titles = async (period) => (await activities.listActivities({ period })).map((a) => a.title).sort();
+  assert.deepEqual(await titles('today'), ['Concluída hoje', 'Pendente antiga']);
+  assert.deepEqual(await titles('30d'), ['Concluída hoje', 'Pendente antiga']);
+  assert.equal((await activities.listActivities({})).length, 4);
+});

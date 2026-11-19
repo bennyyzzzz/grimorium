@@ -9,19 +9,42 @@ import { activityService } from '../../services/activities.js';
 import { useDebouncedValue } from '../../hooks/useDebouncedValue.js';
 import ActivityFilters from './ActivityFilters.jsx';
 import ActivityTable from './ActivityTable.jsx';
+import ActivityBoard from './ActivityBoard.jsx';
+import { VIEWS, readPeriod, readView, savePeriod, saveView } from './activityView.js';
 import ActivityForm from './ActivityForm.jsx';
 import ActivityDetail from './ActivityDetail.jsx';
 import ContactForm from './ContactForm.jsx';
 import TransferPanel from './TransferPanel.jsx';
 import './Demandas.css';
 
-const INITIAL_FILTERS = { search: '', type: '', status: '', importance: '', category: '', due: '' };
+const INITIAL_FILTERS = { period: '', search: '', type: '', status: '', importance: '', category: '', due: '' };
 
 // Permite abrir a lista já filtrada, ex.: /demandas?status=PENDING (atalhos do Dashboard).
+// O período, se não vier no endereço, é o último escolhido.
 function filtersFromParams(params) {
   const filters = { ...INITIAL_FILTERS };
   for (const key of Object.keys(filters)) filters[key] = params.get(key) ?? '';
+  if (!params.has('period')) filters.period = readPeriod();
   return filters;
+}
+
+function ViewToggle({ value, onChange }) {
+  return (
+    <div className="segmented view-toggle" role="radiogroup" aria-label="Visualização">
+      {VIEWS.map((v) => (
+        <label key={v.value} className={`segmented-option${value === v.value ? ' active' : ''}`}>
+          <input
+            type="radio"
+            name="demandas-view"
+            value={v.value}
+            checked={value === v.value}
+            onChange={() => onChange(v.value)}
+          />
+          {v.label}
+        </label>
+      ))}
+    </div>
+  );
 }
 
 export default function Demandas() {
@@ -36,11 +59,19 @@ export default function Demandas() {
   const [selecting, setSelecting] = useState(false);
   const [selected, setSelected] = useState(() => new Set());
   const [reloadKey, setReloadKey] = useState(0);
+  // 'list' | 'board'. O endereço pode forçar a visão (/demandas?visao=quadro); senão, vale a última escolhida.
+  const [view, setView] = useState(() => {
+    const fromUrl = { quadro: 'board', lista: 'list' }[searchParams.get('visao')];
+    if (fromUrl) saveView(fromUrl);
+    return fromUrl ?? readView();
+  });
   // null | { type: 'create' } | { type: 'contact' } | { type: 'transfer' } | { type: 'edit', activity } | { type: 'detail', id, title }
   const [modal, setModal] = useState(null);
 
   const search = useDebouncedValue(filters.search.trim(), 300);
-  const { type, status, importance, category, due } = filters;
+  const { period, type, status, importance, category, due } = filters;
+
+  useEffect(() => savePeriod(period), [period]);
 
   const reload = useCallback(() => setReloadKey((k) => k + 1), []);
   const closeModal = useCallback(() => setModal(null), []);
@@ -64,7 +95,7 @@ export default function Demandas() {
     let active = true;
     setLoading(true);
     activityService
-      .list({ search, type, status, importance, category, due })
+      .list({ period, search, type, status, importance, category, due })
       .then((data) => {
         if (!active) return;
         setActivities(data);
@@ -75,7 +106,7 @@ export default function Demandas() {
     return () => {
       active = false;
     };
-  }, [search, type, status, importance, category, due, reloadKey]);
+  }, [period, search, type, status, importance, category, due, reloadKey]);
 
   useEffect(() => {
     activityService.categories().then(setCategories).catch(() => {});
@@ -111,6 +142,26 @@ export default function Demandas() {
       setError(err.message);
     } finally {
       setBusyId(null);
+    }
+  }
+
+  function changeView(next) {
+    setView(next);
+    saveView(next);
+  }
+
+  // Arrastar no quadro: move o cartão na hora e confirma com o servidor (desfaz se falhar).
+  async function handleMove(activity, nextStatus) {
+    setActivities((list) => list.map((a) => (a.id === activity.id ? { ...a, status: nextStatus } : a)));
+    setBusyId(activity.id);
+    try {
+      await activityService.changeStatus(activity.id, { status: nextStatus });
+      setError(null);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setBusyId(null);
+      reload();
     }
   }
 
@@ -159,7 +210,7 @@ export default function Demandas() {
         filters={filters}
         categories={categories}
         onChange={setFilters}
-        onClear={() => setFilters(INITIAL_FILTERS)}
+        onClear={() => setFilters((f) => ({ ...INITIAL_FILTERS, period: f.period }))}
       />
 
       {error && <p className="form-error page-error">{error}</p>}
@@ -202,20 +253,36 @@ export default function Demandas() {
                     </span>
                   )}
                 </span>
-                <button type="button" className="btn btn-sm btn-ghost" onClick={startSelection}>
-                  Selecionar para exportar
-                </button>
+                <div className="list-summary-actions">
+                  <button type="button" className="btn btn-sm btn-ghost" onClick={startSelection}>
+                    Selecionar para exportar
+                  </button>
+                  <ViewToggle value={view} onChange={changeView} />
+                </div>
               </div>
             )}
-            <ActivityTable
-              activities={activities}
-              selectable={selecting}
-              selected={selected}
-              onSelect={handleSelect}
-              busyId={busyId}
-              onOpen={(activity) => setModal({ type: 'detail', id: activity.id, title: activity.title })}
-              onQuickStatus={handleQuickStatus}
-            />
+            {view === 'board' ? (
+              <ActivityBoard
+                activities={activities}
+                selectable={selecting}
+                selected={selected}
+                onSelect={handleSelect}
+                busyId={busyId}
+                onOpen={(activity) => setModal({ type: 'detail', id: activity.id, title: activity.title })}
+                onQuickStatus={handleQuickStatus}
+                onMove={handleMove}
+              />
+            ) : (
+              <ActivityTable
+                activities={activities}
+                selectable={selecting}
+                selected={selected}
+                onSelect={handleSelect}
+                busyId={busyId}
+                onOpen={(activity) => setModal({ type: 'detail', id: activity.id, title: activity.title })}
+                onQuickStatus={handleQuickStatus}
+              />
+            )}
           </>
         ) : error ? null : hasFilters ? (
           <EmptyState title={LORE.nothingFound}>Ajuste ou limpe os filtros.</EmptyState>

@@ -76,6 +76,15 @@ O aviso também aparece na barra lateral (link **Fazer backup**) e no topo do pa
 
 Cadastro de demandas e contatos, filtros, mudança de status e registros de execução. Contatos (chat, WhatsApp, ligação) entram em um passo só, já contando como trabalho executado no dia.
 
+**Período (Hoje, 7 dias, 30 dias, Tudo):** reduz a lista ao que teve movimento recente. Demandas **em aberto** (pendentes e em andamento) sempre aparecem, para nenhum trabalho sumir de vista. Concluídas, canceladas e contatos só aparecem se foram criados, tiveram registro de execução ou foram concluídos no período. A escolha fica salva no navegador, e "Limpar filtros" não a altera.
+
+**Lista ou Quadro:** o seletor acima da lista alterna entre a tabela e um quadro Kanban com uma coluna por status (Pendente, Em andamento, Concluída, Cancelada). A escolha fica salva no navegador, e `/demandas?visao=quadro` (ou `lista`) abre direto na visão desejada.
+
+- Arrastar um cartão para outra coluna muda o status, com as mesmas regras de registro automático da lista: iniciar e concluir geram registro; voltar para pendente ou cancelar, não.
+- Os botões **Iniciar** e **Concluir** também aparecem nos cartões, e clicar num cartão abre o detalhe.
+- Filtros e o modo **Selecionar para exportar** funcionam nas duas visões.
+- Concluídas e Canceladas mostram os 12 primeiros itens e o restante em **Mostrar mais**.
+
 ### Dashboard
 
 Indicadores e gráficos por período. O período fica na URL (`/?periodo=7d`, `/?de=2026-11-01&ate=2026-11-15`) e os cards de situação abrem a lista já filtrada (`/demandas?status=PENDING`).
@@ -150,7 +159,7 @@ Base: `http://localhost:3333`.
 
 | Método | Rota | Descrição |
 |---|---|---|
-| GET | `/api/activities?search&type&status&importance&category&due` | lista (`type`: `TASK`, `CONTACT`; `due`: `overdue`, `today`, `week`, `none`) |
+| GET | `/api/activities?search&type&status&importance&category&due&period` | lista (`type`: `TASK`, `CONTACT`; `due`: `overdue`, `today`, `week`, `none`; `period`: `today`, `7d`, `30d`) |
 | POST | `/api/activities/contacts` | registra contato em um passo (`title`, `channel`, `contactName?`, `summary?`, `date?`, `timeSpent?`, `followUp?`, `dueDate?`) |
 | GET | `/api/activities/categories` | categorias existentes |
 | GET | `/api/activities/:id` | detalhe com registros |
